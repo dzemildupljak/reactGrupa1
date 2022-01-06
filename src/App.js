@@ -11,24 +11,55 @@ function App() {
   const handleInputChange = (e) => {
     e.preventDefault();
 
-    setNewtask({ ...newtask, title: e.target.value });
+    setNewtask((prevState) => {
+      return { ...prevState, title: e.target.value };
+    });
   };
 
   const addNewTask = () => {
     if (newtask.title !== "") {
-      setTasks([...tasks, newtask]);
-      setNewtask({ title: "" });
+      setTasks((prevState) => {
+        if (prevState.length === 0) {
+          return [{ id: 1, ...newtask }];
+        } else {
+          return [
+            ...prevState,
+            { id: prevState[prevState.length - 1].id + 1, ...newtask },
+          ];
+        }
+      });
+
+      setNewtask({ title: "", isDone: false });
     }
   };
 
   const removeLastTask = () => {
     setTasks(
       tasks.filter((t, i) => {
-        if (i !== tasks.length - 1) {
-          return t;
-        }
+        return i !== tasks.length - 1 && t;
       })
     );
+  };
+
+  const handleTaskDone = (index) => {
+    setTasks(
+      tasks.map((t, i) => {
+        if (i === index) {
+          return { ...t, isDone: !t.isDone };
+        }
+        return t;
+      })
+    );
+  };
+
+  const removeSpecTask = (index) => {
+    setTasks((prevState) => {
+      return prevState.filter((t, i) => {
+        if (i !== index) {
+          return t;
+        }
+      });
+    });
   };
 
   return (
@@ -46,12 +77,27 @@ function App() {
       <button onClick={addNewTask}> add new task</button>
 
       <ul>
-        {tasks.map((t, i) => {
+        {tasks.map((t) => {
           return (
-            <li key={i}>
-              <span>{t.title}</span>
-              {/* TODO change checkbox value onClick */}
-              <input type="checkbox" value={t.isDone} />
+            <li key={t.id}>
+              <span className={`${t.isDone ? "task-done" : ""}`}>
+                {t.title}
+              </span>
+              <input
+                type="checkbox"
+                value={t.isDone}
+                onChange={() => {
+                  handleTaskDone(t.id);
+                }}
+              />
+              <span
+                className="remove-task"
+                onClick={() => {
+                  removeSpecTask(t.id);
+                }}
+              >
+                x
+              </span>
             </li>
           );
         })}
