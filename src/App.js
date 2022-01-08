@@ -1,109 +1,96 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./App.css";
+import User from "./components/User";
 
 function App() {
-  const [newtask, setNewtask] = useState({
-    title: "",
-    isDone: false,
-  });
-  const [tasks, setTasks] = useState([]);
+  const [users, setUsers] = useState([
+    {
+      id: 30,
+      name: "sysadmin",
+      email: "sysadmin@mail.com",
+      username: "sysadmin",
+      role: "sysadmin",
+      is_active: true,
+    },
+    {
+      id: 3,
+      name: "imran",
+      email: "imranmidovic@gmail.com",
+      username: "imran",
+      role: "user",
+      is_active: true,
+    },
+    {
+      id: 31,
+      name: "Faris Bektašević",
+      email: "bektasevicfaris@gmail.com",
+      username: "faris",
+      role: "undefined",
+      is_active: true,
+    },
+    {
+      id: 26,
+      name: "fdslfkdl;ksa",
+      email: "lfdksflkdsl@email.com",
+      username: "dfksldksl;",
+      role: "undefined",
+      is_active: true,
+    },
+    {
+      id: 27,
+      name: "Denan",
+      email: "dz@gamil.com",
+      username: "dz",
+      role: "undefined",
+      is_active: true,
+    },
+    {
+      id: 28,
+      name: "neko",
+      email: "neko@email.com",
+      username: "neko",
+      role: "undefined",
+      is_active: true,
+    },
+    {
+      id: 29,
+      name: "Sejo",
+      email: "s@gmail.com",
+      username: "seka",
+      role: "undefined",
+      is_active: true,
+    },
+  ]);
 
-  const handleInputChange = (e) => {
-    e.preventDefault();
-
-    setNewtask((prevState) => {
-      return { ...prevState, title: e.target.value };
-    });
-  };
-
-  const addNewTask = () => {
-    if (newtask.title !== "") {
-      setTasks((prevState) => {
-        if (prevState.length === 0) {
-          return [{ id: 1, ...newtask }];
-        } else {
-          return [
-            ...prevState,
-            { id: prevState[prevState.length - 1].id + 1, ...newtask },
-          ];
+  const removeUser = (uId) => {
+    setUsers(
+      users.filter((u) => {
+        if (u.id !== uId) {
+          return u;
         }
-      });
-
-      setNewtask({ title: "", isDone: false });
-    }
-  };
-
-  const removeLastTask = () => {
-    setTasks(
-      tasks.filter((t, i) => {
-        return i !== tasks.length - 1 && t;
       })
     );
-  };
-
-  const handleTaskDone = (index) => {
-    setTasks(
-      tasks.map((t, i) => {
-        if (i === index) {
-          return { ...t, isDone: !t.isDone };
-        }
-        return t;
-      })
-    );
-  };
-
-  const removeSpecTask = (index) => {
-    setTasks((prevState) => {
-      return prevState.filter((t, i) => {
-        if (i !== index) {
-          return t;
-        }
-      });
-    });
   };
 
   return (
     <div className="container">
-      <label htmlFor="name-input">Unesite ime </label>
-      <input
-        name="name-input"
-        type="text"
-        placeholder="Unesite ime"
-        value={newtask.title}
-        onChange={(e) => {
-          handleInputChange(e);
-        }}
-      />
-      <button onClick={addNewTask}> add new task</button>
-
-      <ul>
-        {tasks.map((t) => {
-          return (
-            <li key={t.id}>
-              <span className={`${t.isDone ? "task-done" : ""}`}>
-                {t.title}
-              </span>
-              <input
-                type="checkbox"
-                value={t.isDone}
-                onChange={() => {
-                  handleTaskDone(t.id);
-                }}
-              />
-              <span
-                className="remove-task"
-                onClick={() => {
-                  removeSpecTask(t.id);
-                }}
-              >
-                x
-              </span>
-            </li>
-          );
-        })}
-      </ul>
-
-      <button onClick={removeLastTask}>remove last task</button>
+      <table className="user-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Active</th>
+            <th>Options</th>
+          </tr>
+        </thead>
+        <tbody>
+          {users.map((u) => {
+            return <User key={u.id} usr={u} rmUser={removeUser} />;
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }
