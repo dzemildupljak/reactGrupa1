@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import "./App.css";
 import User from "./components/User";
 
@@ -62,6 +62,13 @@ function App() {
     },
   ]);
 
+  const [user, setUser] = useState({
+    name: "",
+    username: "",
+    email: "",
+    is_active: false,
+  });
+
   const removeUser = (uId) => {
     setUsers(
       users.filter((u) => {
@@ -71,9 +78,80 @@ function App() {
       })
     );
   };
+  const greatesId = () => {
+    let maxid = users[0].id;
+    users.forEach((u) => {
+      if (u.id > maxid) {
+        maxid = u.id;
+      }
+    });
+    return maxid;
+  };
+
+  const inputHandler = (e) => {
+    e.preventDefault();
+    setUser((prevState) => {
+      if (e.target.name === "is_active") {
+        return {
+          ...prevState,
+          [e.target.name]: !user.is_active,
+        };
+      } else {
+        return {
+          ...prevState,
+          [e.target.name]: e.target.value,
+        };
+      }
+    });
+  };
+
+  const addNewUser = () => {
+    setUsers([...users, { id: greatesId() + 1, ...user }]);
+    setUser({
+      name: "",
+      username: "",
+      email: "",
+      is_active: false,
+    });
+  };
 
   return (
     <div className="container">
+      <div className="form-container">
+        <input
+          type="text"
+          name="name"
+          value={user.name}
+          onChange={(e) => {
+            inputHandler(e);
+          }}
+        />
+        <input
+          type="text"
+          name="username"
+          value={user.username}
+          onChange={(e) => {
+            inputHandler(e);
+          }}
+        />
+        <input
+          type="text"
+          name="email"
+          value={user.email}
+          onChange={(e) => {
+            inputHandler(e);
+          }}
+        />
+        <input
+          type="checkbox"
+          name="is_active"
+          checked={user.is_active}
+          onChange={(e) => {
+            inputHandler(e);
+          }}
+        />
+        <button onClick={addNewUser}>Add user</button>
+      </div>
       <table className="user-table">
         <thead>
           <tr>
