@@ -61,13 +61,13 @@ function App() {
       is_active: true,
     },
   ]);
-
   const [user, setUser] = useState({
     name: "",
     username: "",
     email: "",
     is_active: false,
   });
+  const [addEdit, setAddEdit] = useState(1);
 
   const removeUser = (uId) => {
     setUsers(
@@ -78,6 +78,17 @@ function App() {
       })
     );
   };
+  const fillForm = (uId) => {
+    let editedUser = {};
+    users.forEach((u) => {
+      if (uId === u.id) {
+        editedUser = u;
+      }
+    });
+    setUser(editedUser);
+    setAddEdit(2);
+  };
+
   const greatesId = () => {
     let maxid = users[0].id;
     users.forEach((u) => {
@@ -86,6 +97,25 @@ function App() {
       }
     });
     return maxid;
+  };
+
+  const saveEditedUser = (uId) => {
+    setUsers((prevState) => {
+      return prevState.map((u) => {
+        if (uId === u.id) {
+          return user;
+        } else {
+          return u;
+        }
+      });
+    });
+    setUser({
+      name: "",
+      username: "",
+      email: "",
+      is_active: false,
+    });
+    setAddEdit(1);
   };
 
   const inputHandler = (e) => {
@@ -150,7 +180,16 @@ function App() {
             inputHandler(e);
           }}
         />
-        <button onClick={addNewUser}>Add user</button>
+        {addEdit === 1 && <button onClick={addNewUser}>Add user</button>}
+        {addEdit === 2 && (
+          <button
+            onClick={() => {
+              saveEditedUser(user.id);
+            }}
+          >
+            Save
+          </button>
+        )}
       </div>
       <table className="user-table">
         <thead>
@@ -165,7 +204,9 @@ function App() {
         </thead>
         <tbody>
           {users.map((u) => {
-            return <User key={u.id} usr={u} rmUser={removeUser} />;
+            return (
+              <User key={u.id} usr={u} rmUser={removeUser} editUsr={fillForm} />
+            );
           })}
         </tbody>
       </table>
