@@ -1,80 +1,52 @@
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import "./App.css";
 import User from "./components/User";
+import { greatesId } from "./helper/helper";
+
+// {
+//   "name": "ajsa",
+//   "email": "ajsa@mail.com",
+//   "username": "ajsa",
+//   "password": "ajsa12"
+// }
 
 function App() {
-  const [users, setUsers] = useState([
-    {
-      id: 30,
-      name: "sysadmin",
-      email: "sysadmin@mail.com",
-      username: "sysadmin",
-      role: "sysadmin",
-      is_active: true,
-    },
-    {
-      id: 3,
-      name: "imran",
-      email: "imranmidovic@gmail.com",
-      username: "imran",
-      role: "user",
-      is_active: true,
-    },
-    {
-      id: 31,
-      name: "Faris Bektašević",
-      email: "bektasevicfaris@gmail.com",
-      username: "faris",
-      role: "undefined",
-      is_active: true,
-    },
-    {
-      id: 26,
-      name: "fdslfkdl;ksa",
-      email: "lfdksflkdsl@email.com",
-      username: "dfksldksl;",
-      role: "undefined",
-      is_active: true,
-    },
-    {
-      id: 27,
-      name: "Denan",
-      email: "dz@gamil.com",
-      username: "dz",
-      role: "undefined",
-      is_active: true,
-    },
-    {
-      id: 28,
-      name: "neko",
-      email: "neko@email.com",
-      username: "neko",
-      role: "undefined",
-      is_active: true,
-    },
-    {
-      id: 29,
-      name: "Sejo",
-      email: "s@gmail.com",
-      username: "seka",
-      role: "undefined",
-      is_active: true,
-    },
-  ]);
+  const [users, setUsers] = useState([]);
   const [user, setUser] = useState({
     name: "",
     username: "",
     email: "",
-    is_active: false,
+    password: "",
   });
   const [addEdit, setAddEdit] = useState(1);
 
+  const getUsersData = async () => {
+    try {
+      let response = await axios.get(
+        "https://centarnitbe.herokuapp.com/user/all"
+      );
+      setUsers(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const addUser = () => {
+    try {
+      axios.post("https://centarnitbe.herokuapp.com/user/", {
+        name: user.name,
+        email: user.email,
+        username: user.username,
+        password: user.password,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const removeUser = (uId) => {
     setUsers(
       users.filter((u) => {
-        if (u.id !== uId) {
-          return u;
-        }
+        return u.id !== uId && u;
       })
     );
   };
@@ -87,16 +59,6 @@ function App() {
     });
     setUser(editedUser);
     setAddEdit(2);
-  };
-
-  const greatesId = () => {
-    let maxid = users[0].id;
-    users.forEach((u) => {
-      if (u.id > maxid) {
-        maxid = u.id;
-      }
-    });
-    return maxid;
   };
 
   const saveEditedUser = (uId) => {
@@ -121,33 +83,43 @@ function App() {
   const inputHandler = (e) => {
     e.preventDefault();
     setUser((prevState) => {
-      if (e.target.name === "is_active") {
-        return {
-          ...prevState,
-          [e.target.name]: !user.is_active,
-        };
-      } else {
-        return {
-          ...prevState,
-          [e.target.name]: e.target.value,
-        };
-      }
+      return {
+        ...prevState,
+        [e.target.name]: e.target.value,
+      };
     });
   };
 
   const addNewUser = () => {
-    setUsers([...users, { id: greatesId() + 1, ...user }]);
+    if (user.username && user.email && user.name) {
+      setUsers([...users, { id: greatesId(users) + 1, ...user }]);
+      setUser({
+        name: "",
+        username: "",
+        email: "",
+        password: "",
+      });
+    }
+  };
+
+  const cancelEditForm = () => {
     setUser({
       name: "",
       username: "",
       email: "",
-      is_active: false,
+      password: "",
     });
+    setAddEdit(1);
   };
+
+  useEffect(() => {
+    getUsersData();
+  }, []);
 
   return (
     <div className="container">
       <div className="form-container">
+        <label htmlFor="name">Name</label>
         <input
           type="text"
           name="name"
@@ -156,6 +128,7 @@ function App() {
             inputHandler(e);
           }}
         />
+        <label htmlFor="username">Username</label>
         <input
           type="text"
           name="username"
@@ -164,6 +137,7 @@ function App() {
             inputHandler(e);
           }}
         />
+        <label htmlFor="email">Email</label>
         <input
           type="text"
           name="email"
@@ -172,23 +146,31 @@ function App() {
             inputHandler(e);
           }}
         />
-        <input
-          type="checkbox"
-          name="is_active"
-          checked={user.is_active}
-          onChange={(e) => {
-            inputHandler(e);
-          }}
-        />
-        {addEdit === 1 && <button onClick={addNewUser}>Add user</button>}
+        {addEdit === 1 && (
+          <>
+            <label htmlFor="password">Password</label>
+            <input
+              type="text"
+              name="password"
+              value={user.password}
+              onChange={(e) => {
+                inputHandler(e);
+              }}
+            />
+          </>
+        )}
+        {addEdit === 1 && <button onClick={addUser}>Add user</button>}
         {addEdit === 2 && (
-          <button
-            onClick={() => {
-              saveEditedUser(user.id);
-            }}
-          >
-            Save
-          </button>
+          <div>
+            <button
+              onClick={() => {
+                saveEditedUser(user.id);
+              }}
+            >
+              Save
+            </button>
+            <button onClick={cancelEditForm}>Cancel</button>
+          </div>
         )}
       </div>
       <table className="user-table">
